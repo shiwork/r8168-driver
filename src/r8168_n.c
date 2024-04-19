@@ -7219,7 +7219,7 @@ static int rtl8168_enable_eee(struct rtl8168_private *tp)
         int ret;
         u16 data;
         u32 csi_tmp;
-        struct ethtool_eee *eee = &tp->eee;
+        struct ethtool_keee *eee = &tp->eee;
         u16 eee_adv_t = ethtool_adv_to_mmd_eee_adv_t(eee->advertised);
 
         ret = 0;
@@ -7806,10 +7806,10 @@ rtl8168_device_lpi_t_to_ethtool_lpi_t(struct rtl8168_private *tp , u32 lpi_timer
 }
 
 static int
-rtl_ethtool_get_eee(struct net_device *net, struct ethtool_eee *edata)
+rtl_ethtool_get_eee(struct net_device *net, struct ethtool_keee *edata)
 {
         struct rtl8168_private *tp = netdev_priv(net);
-        struct ethtool_eee *eee = &tp->eee;
+        struct ethtool_keee *eee = &tp->eee;
         u32 lp, adv, tx_lpi_timer, supported = 0;
         u16 val;
 
@@ -7850,10 +7850,10 @@ rtl_ethtool_get_eee(struct net_device *net, struct ethtool_eee *edata)
 }
 
 static int
-rtl_ethtool_set_eee(struct net_device *net, struct ethtool_eee *edata)
+rtl_ethtool_set_eee(struct net_device *net, struct ethtool_keee *edata)
 {
         struct rtl8168_private *tp = netdev_priv(net);
-        struct ethtool_eee *eee = &tp->eee;
+        struct ethtool_keee *eee = &tp->eee;
         u32 advertising;
         int rc = 0;
 
@@ -26567,7 +26567,7 @@ err1:
 #endif //LINUX_VERSION_CODE >= KERNEL_VERSION(4,10,0)
 
         if (rtl8168_support_eee(tp)) {
-                struct ethtool_eee *eee = &tp->eee;
+                struct ethtool_keee *eee = &tp->eee;
 
                 eee->eee_enabled = eee_enable;
                 eee->supported  = SUPPORTED_100baseT_Full |

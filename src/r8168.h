@@ -2042,7 +2042,7 @@ struct rtl8168_private {
         //Realwow--------------
 #endif //ENABLE_REALWOW_SUPPORT
 
-        struct ethtool_eee eee;
+        struct ethtool_keee eee;
 
         u32 dynamic_aspm_packet_count;
 
