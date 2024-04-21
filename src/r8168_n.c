@@ -7840,9 +7840,9 @@ rtl_ethtool_get_eee(struct net_device *net, struct ethtool_keee *edata)
 
         edata->eee_enabled = !!val;
         edata->eee_active = !!(supported & adv & lp);
-        edata->supported = supported;
-        edata->advertised = adv;
-        edata->lp_advertised = lp;
+        linkmode_copy(edata->supported, supported);
+        linkmode_copy(edata->advertised, adv);
+        linkmode_copy(edata->lp_advertised, lp);
         edata->tx_lpi_enabled = edata->eee_enabled;
         edata->tx_lpi_timer = tx_lpi_timer;
 
@@ -7854,7 +7854,7 @@ rtl_ethtool_set_eee(struct net_device *net, struct ethtool_keee *edata)
 {
         struct rtl8168_private *tp = netdev_priv(net);
         struct ethtool_keee *eee = &tp->eee;
-        u32 advertising;
+        long unsigned int *advertising;
         int rc = 0;
 
         if (!rtl8168_support_eee(tp))
@@ -7878,23 +7878,26 @@ rtl_ethtool_set_eee(struct net_device *net, struct ethtool_keee *edata)
         }
 
         advertising = tp->advertising;
+
         if (!edata->advertised) {
-                edata->advertised = advertising & eee->supported;
-        } else if (edata->advertised & ~advertising) {
+                long unsigned int adv;
+                adv = *advertising & *eee->supported;
+                linkmode_copy(edata->advertised, &adv);
+        } else if (*edata->advertised & ~*advertising) {
                 dev_printk(KERN_WARNING, tp_to_dev(tp), "EEE advertised %x must be a subset of autoneg advertised speeds %x\n",
                            edata->advertised, advertising);
                 rc = -EINVAL;
                 goto out;
         }
 
-        if (edata->advertised & ~eee->supported) {
+        if (*edata->advertised & ~*eee->supported) {
                 dev_printk(KERN_WARNING, tp_to_dev(tp), "EEE advertised %x must be a subset of support %x\n",
                            edata->advertised, eee->supported);
                 rc = -EINVAL;
                 goto out;
         }
 
-        eee->advertised = edata->advertised;
+        linkmode_copy(edata->advertised, eee->advertised);
         eee->eee_enabled = edata->eee_enabled;
 
         if (eee->eee_enabled)
@@ -26570,9 +26573,8 @@ err1:
                 struct ethtool_keee *eee = &tp->eee;
 
                 eee->eee_enabled = eee_enable;
-                eee->supported  = SUPPORTED_100baseT_Full |
-                                  SUPPORTED_1000baseT_Full;
-                eee->advertised = mmd_eee_adv_to_ethtool_adv_t(MDIO_EEE_1000T | MDIO_EEE_100TX);
+                linkmode_copy(eee->supported, SUPPORTED_100baseT_Full | SUPPORTED_1000baseT_Full);
+                linkmode_copy(eee->advertised, mmd_eee_adv_to_ethtool_adv_t(MDIO_EEE_1000T | MDIO_EEE_100TX));
                 eee->tx_lpi_enabled = eee_enable;
                 eee->tx_lpi_timer = dev->mtu + ETH_HLEN + 0x20;
         }
